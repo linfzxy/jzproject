@@ -1,0 +1,2 @@
+module JzprojectHelper
+end

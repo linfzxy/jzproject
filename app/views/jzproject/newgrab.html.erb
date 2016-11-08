@@ -1,0 +1,32 @@
+<%= form_for :jzproject do |f| %>
+    <p>
+      <%= f.label 'url链接' %><br>
+      <%= f.text_area :url %>
+    </p>
+
+    <p>
+      <%= f.label 'cookie记录' %><br>
+      <%= f.text_area :cookie %>
+    </p>
+
+    <p>
+      <%= f.label '启始页数' %><br>
+      <%= f.text_field :startpage, :value => "0"%>
+    </p>
+
+    <p>
+      <%= f.label '请求间隔/s' %><br>
+      <%= f.text_field :url, :value => "2"%>
+    </p>
+
+    <p>
+      <%= f.submit %>
+    </p>
+<% end %>
+
+<hr/>
+<a href="www.baidu.com">生成文档</a>
+<hr/>
+<a href="www.baidu.com">下载</a>
+<hr/>
+<a href="www.baidu.com">初始化系统</a>
