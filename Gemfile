@@ -1,6 +1,12 @@
 source 'http://gems.ruby-china.org'
 
+# 分词器的gzip的解码器
+#gem 'zlib'
 
+# write_xlsx excel书写器
+gem 'write_xlsx'
+# httpclient
+gem 'excon'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
 # Use sqlite3 as the database for Active Record

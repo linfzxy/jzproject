@@ -16,17 +16,20 @@
 
     <p>
       <%= f.label '请求间隔/s' %><br>
-      <%= f.text_field :url, :value => "2"%>
+      <%= f.text_field :gap, :value => "5"%>
     </p>
 
     <p>
       <%= f.submit %>
     </p>
 <% end %>
-
 <hr/>
-<a href="www.baidu.com">生成文档</a>
+<a href="/jzproject/checkstage">查看已完成进度</a>
 <hr/>
-<a href="www.baidu.com">下载</a>
+<a href="/jzproject/analysis">打散句子，分词</a>
 <hr/>
-<a href="www.baidu.com">初始化系统</a>
+<a href="/jzproject/makexlsx">生成xlsx</a>
+<hr/>
+<a href="/count.xlsx">下载</a>
+<hr/>
+<a href="/jzproject/reset">初始化系统</a>
