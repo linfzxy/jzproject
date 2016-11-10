@@ -1,0 +1,17 @@
+<h1>checkstage</h1>
+
+<table>
+  <tr>
+    <th>lastpage</th>
+    <th>正文</th>
+    <th>url</th>
+  </tr>
+
+  <% @posts.each do |post| %>
+      <tr>
+        <td><%= post.lastpage %></td>
+        <td><%= post.body %></td>
+        <td><%= post.url %></td>
+      </tr>
+  <% end %>
+</table>

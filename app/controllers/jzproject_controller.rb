@@ -19,6 +19,35 @@ class JzprojectController < ApplicationController
   end
 
   def makexlsx
+    #清空分词表
+    WordCount.delete_all
+
+    #发送请求查询
+    comments=Comment.all
+    map=Hash.new {|e,k| e=Array.new }
+    comments.each{ |comment|
+      map[comment[:likecount]]=map[comment[:likecount]]<<comment[:body]
+    }
+
+    #向分词器发送请求
+    result_map=Hash.new 0
+    map.each{ |k,v|
+      next if k==nil
+      sendbody=""
+      v.each{ |c|
+        sendbody=sendbody+c
+        if sendbody.size>10000
+          analyzer_client sendbody,result_map,k
+          sendbody=""
+        end
+      }
+      analyzer_client sendbody,result_map,k
+    }
+    result_map.each{ |k,v|
+      WordCount.create(word: k,count: v)
+    }
+
+    #生成xml
     filepath=File.join(Rails.root,'public','count.xlsx')
     require 'write_xlsx'
     workbook = WriteXLSX.new(filepath)
@@ -72,15 +101,11 @@ class JzprojectController < ApplicationController
     }
 
     #向分词器发送请求
-
     result_map=Hash.new 0
     map.each{ |k,v|
       next if k==nil
       sendbody=""
       v.each{ |c|
-        while c.index('<')!=nil
-          c[c.index('<')..c.index('>')]=''
-        end
         sendbody=sendbody+c
         if sendbody.size>10000
           analyzer_client sendbody,result_map,k
@@ -90,15 +115,7 @@ class JzprojectController < ApplicationController
       analyzer_client sendbody,result_map,k
     }
     result_map.each{ |k,v|
-      temp=k.dup
-      temp.force_encoding('GBK')
-      puts temp.encoding
-
-
-      puts k
-
-
-       WordCount.create(word: k,count: v)
+    WordCount.create(word: k,count: v)
     }
     render plain:"分析完啦~"
   end
@@ -159,49 +176,56 @@ class JzprojectController < ApplicationController
 
       #需要在结尾附上pagenumber
       comment_url='http://m.weibo.cn/single/rcList?format=cards&id='+mid.to_s+'&type=comment&hot=0&page='
-      map,lastpage=comments_geter(comment_url,cookie,startpage,gap)
+
+      #获取评论总页数
+      require 'json'
+      response=http_get(comment_url+"0",cookie)
+      body=JSON.parse response.body
+      maxPage=body[1]['maxPage']
 
       #向数据库里丢东西
-      post=Post.create(url: url,body: post_body, lastpage: lastpage, mid: mid)
-      map.each{ |k,v|
-        v.each{ |comment_body|
-          while comment_body.index('<')!=nil
-            comment_body[comment_body.index('<')..comment_body.index('>')]=''
-          end
-          while comment_body.index('[')!=nil
-            comment_body[comment_body.index('[')..comment_body.index(']')]=''
-          end
-          post.comments.create(body: comment_body ,likecount:k)
-        }
-      }
+      post=Post.create(url: url,body: post_body, lastpage: startpage, mid: mid)
+      post.lastpage=comments_geter(comment_url,cookie,startpage,gap,maxPage,post)
+      post.save
    # }
     render plain:'ok~ 成功啦~'
   end
 
-  def comments_geter(url,cookie,startpage,gap)
-    i=startpage.to_i
-    map=Hash.new {|e,k| e=Array.new }
-    #body=nil
-    loop do
+  #返回执行到的页数
+  def comments_geter(url,cookie,startpage,gap,maxPage,post)
+    require 'json'
+    (startpage.to_i..maxPage.to_i).each{ |i|
+      errorcounter=0
       current_url=url+i.to_s
-      response=http_get(current_url,cookie)
-      body=response.body.gsub 'null','""'
-      body=eval(body)
-      flag=true
-      break if body==nil
+      body=nil
+      begin
+        #重试计数器 重试7次停止本次抓取
+        errorcounter+=1
+        response=http_get(current_url,cookie)
+        body=response.body.gsub 'null','""'
+        body=eval(body)
+      end until body!=nil || errorcounter==7
+      if body==nil
+        return i
+      end
       body.each{ |element|
         next if element[:mod_type]!='mod/pagelist'
-        flag=false
         element[:card_group].each{ |message|
-          map[message[:like_counts]]=map[message[:like_counts]]<<message[:text]
+            comment_body=message[:text]
+            k=message[:like_counts]
+            while comment_body.index('<')!=nil
+              comment_body[comment_body.index('<')..comment_body.index('>')]=''
+            end
+            while comment_body.index('[')!=nil
+              comment_body[comment_body.index('[')..comment_body.index(']')]=''
+            end
+            post.comments.create(body: comment_body ,likecount:k)
+          }
         }
-      }
-      i+=1
-      break if flag
+      #安全 延迟
       sleep gap.to_i
-    end
-    #puts body.inspect
-    return map,i
+      }
+    return maxPage.to_i
   end
 
   def http_get(url,cookie)
