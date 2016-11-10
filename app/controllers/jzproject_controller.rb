@@ -6,6 +6,11 @@ class JzprojectController < ApplicationController
     render plain:"没了~"
   end
 
+  def resetWordcount
+    WordCount.delete_all
+    render plain:"分词表没了~~"
+  end
+
   def newgrab
   end
 
@@ -22,9 +27,12 @@ class JzprojectController < ApplicationController
     posts=Post.all
     row=0
     posts.each{ |posts|
-      sheet1.write(row,0,posts[:lastpage])
-      sheet1.write(row,1,posts[:body])
-      sheet1.write(row,2,posts[:url])
+      begin
+        sheet1.write(row,0,posts[:lastpage])
+        sheet1.write(row,1,posts[:body])
+        sheet1.write(row,2,posts[:url])
+      rescue
+      end
       row+=1
     }
 
@@ -32,8 +40,11 @@ class JzprojectController < ApplicationController
     comments=Comment.all
     row=0
     comments.each{ |comment|
-      sheet2.write(row,0,comment[:likecount])
-      sheet2.write(row,1,comment[:body])
+      begin
+        sheet2.write(row,0,comment[:likecount])
+        sheet2.write(row,1,comment[:body])
+      rescue
+      end
       row+=1
     }
 
@@ -41,8 +52,11 @@ class JzprojectController < ApplicationController
     wcs=WordCount.all
     row=0
     wcs.each{ |wc|
-      sheet3.write(row,0,wc[:count])
-      sheet3.write(row,1,wc[:word])
+      begin
+        sheet3.write(row,0,wc[:count])
+        sheet3.write(row,1,wc[:word])
+      rescue
+      end
       row+=1
     }
 
@@ -132,7 +146,8 @@ class JzprojectController < ApplicationController
     #Thread.new{
       #postbody 丢到数据库post的body中~
       body=response.body
-      i=body.index 'text',body.index('retweeted_status')
+      shift=body.index('mblog')==nil ? body.index('retweeted_status'):body.index('mblog')
+      i=body.index 'text',shift
       j=body.index 'textLength'
       str=body[i+7..j-4]
       post_body=eval('"'+str+'"')
@@ -152,6 +167,9 @@ class JzprojectController < ApplicationController
         v.each{ |comment_body|
           while comment_body.index('<')!=nil
             comment_body[comment_body.index('<')..comment_body.index('>')]=''
+          end
+          while comment_body.index('[')!=nil
+            comment_body[comment_body.index('[')..comment_body.index(']')]=''
           end
           post.comments.create(body: comment_body ,likecount:k)
         }

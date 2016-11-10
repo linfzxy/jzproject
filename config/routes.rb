@@ -5,5 +5,7 @@ Rails.application.routes.draw do
   get "/jzproject/analysis", to: 'jzproject#analysis'
   get "/jzproject/makexlsx", to: 'jzproject#makexlsx'
   get "/jzproject/reset", to: 'jzproject#reset'
+  get "/jzproject/resetWordcount", to: 'jzproject#resetWordcount'
+
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
