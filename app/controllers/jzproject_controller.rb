@@ -148,8 +148,8 @@ class JzprojectController < ApplicationController
       body=response.body
       shift=body.index('mblog')==nil ? body.index('retweeted_status'):body.index('mblog')
       i=body.index 'text',shift
-      j=body.index 'textLength'
-      str=body[i+7..j-4]
+      j=body.index '"',i+7
+      str=body[i+7...j]
       post_body=eval('"'+str+'"')
 
       #mid是comments的标识符
