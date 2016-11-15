@@ -232,7 +232,7 @@ class JzprojectController < ApplicationController
     require 'excon'
     header={}
     header['Accept']='text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-    header['Accept-Encoding']='utf-8'
+    header['Accept-Encoding']='gbk'
     header['Accept-Language']='zh-CN,zh;q=0.8'
     header['Cache-Control']='max-age=0'
     header['Connection']='keep-alive'

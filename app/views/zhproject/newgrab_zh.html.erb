@@ -1,0 +1,71 @@
+<%= form_for :zhproject,url:zhproject_quse_ans_comme_url do |f| %>
+    <h2>抓知乎所有一个问题下的所有回答+评论</h2>
+    <p>
+      <%= f.label '问题id' %><br>
+      <%= f.text_area :quest_id %>
+    </p>
+
+    <p>
+      <%= f.label 'Xsrftoken' %><br>
+      <%= f.text_area :xsrftoken %>
+    </p>
+
+    <p>
+      <%= f.label 'offset' %><br>
+      <%= f.text_field :offset,:value=>'0' %>
+    </p>
+
+    <p>
+      <%= f.label '请求间隔/s' %><br>
+      <%= f.text_field :gap, :value => "3"%>
+    </p>
+
+    <p>
+      <%= f.submit %>
+    </p>
+<% end %>
+<hr/>
+
+<%= form_for :zhproject,url:zhproject_ans_comme_url do |f| %>
+    <h2>抓知乎某一回答下的所有评论</h2>
+    <p>
+      <%= f.label '回答id' %><br>
+      <%= f.text_area :ans_id %>
+    </p>
+
+    <p>
+      <%= f.label '偏移页数' %><br>
+      <%= f.text_field :offset,:value=>'0' %>
+    </p>
+
+    <p>
+      <%= f.label '请求间隔/s' %><br>
+      <%= f.text_field :gap, :value => "3"%>
+    </p>
+
+    <p>
+      <%= f.submit %>
+    </p>
+<% end %>
+<hr/>
+
+
+<%= form_for :zhproject,url:zhproject_additional_url do |f| %>
+    <h2>手动添加需要分析的内容</h2>
+    <p>
+      <%= f.label '需要分析的文本' %><br>
+      <%= f.text_area :content %>
+    </p>
+
+    <p>
+      <%= f.label '权重/点赞数/倍数' %><br>
+      <%= f.text_field :likecounter,:value=>'0' %>
+    </p>
+
+    <p>
+      <%= f.submit %>
+    </p>
+<% end %>
+<hr/>
+<a href="jzproject.coffee">回去</a>
+
