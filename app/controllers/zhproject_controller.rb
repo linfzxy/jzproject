@@ -51,10 +51,12 @@ class ZhprojectController < ApplicationController
           grab_comments(comment_id,0,gap)
           }
       end until msgs==nil || msgs.size==0
-    rescue
+    rescue => err
+      render plain:err.inspect
+    end
       ques_po.lastpage=offset
       ques_po.save
-    end
+    ensure
     render plain:'ok~'
   end
 
@@ -85,7 +87,9 @@ class ZhprojectController < ApplicationController
         }
         offset+=1
       end
-    rescue
+    rescue => err
+      render plain:err.inspect
+    ensure
       ans.lastpage=offset
       ans.save
     end

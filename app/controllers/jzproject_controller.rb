@@ -102,6 +102,7 @@ class JzprojectController < ApplicationController
 
     #向分词器发送请求
     result_map=Hash.new 0
+    error_info=''
     map.each{ |k,v|
       next if k==nil
       sendbody=""
@@ -112,11 +113,12 @@ class JzprojectController < ApplicationController
           sendbody=""
         end
       }
-      analyzer_client sendbody,result_map,k
+      error_info+=analyzer_client sendbody,result_map,k
     }
     result_map.each{ |k,v|
     WordCount.create(word: k,count: v)
     }
+    WordCount.create(word: error_info,count: -1) if error_info!=''
     render plain:"分析完啦~"
   end
 
@@ -129,6 +131,7 @@ class JzprojectController < ApplicationController
   # end
 
   def analyzer_client(body,result_map,power)
+    error_info=''
     #puts body
     require 'excon'
     analyzer_url='http://api.bosonnlp.com/tag/analysis?space_mode=0&oov_level=4&t2s=0&&special_char_conv=1'
@@ -141,13 +144,18 @@ class JzprojectController < ApplicationController
     response=Excon.post(analyzer_url, :headers => header,:body=>body)
     require 'json'
     result_array=JSON.parse response.body
-    result_array[0]['word'].each{ |w|
-      # ########################
-      # filepath='C:\Users\Lynn\Desktop\temp\test.txt'
-      # aFile = File.new(filepath, "r+")
-      # aFile.syswrite w
-      result_map[w]+=(1+power)
-    }
+    if response.status==200
+      result_array[0]['word'].each{ |w|
+        # ########################
+        # filepath='C:\Users\Lynn\Desktop\temp\test.txt'
+        # aFile = File.new(filepath, "r+")
+        # aFile.syswrite w
+        result_map[w]+=(1+power)
+      }
+    else
+      error_info+=body
+    end
+    return error_info
   end
 
   def dograb
